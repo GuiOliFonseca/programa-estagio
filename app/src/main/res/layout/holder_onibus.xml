@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="65dp">
+
+    <ImageView
+        android:id="@+id/imagem"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_margin="5dp"
+        android:src="@drawable/ic_baseline_directions_bus_24"/>
+
+
+    <TextView
+        android:id="@+id/nome"
+        android:layout_toEndOf="@+id/imagem"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:gravity="bottom"
+        android:textSize="14sp"
+        android:text="Nome onibus"
+        android:textColor="#000"/>
+
+    <TextView
+        android:id="@+id/horario"
+        android:layout_width="wrap_content"
+        android:layout_toEndOf="@+id/nome"
+        android:layout_height="54dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="5dp"
+        android:gravity="bottom"
+        android:textSize="14sp"
+        android:text="Tempo restante"
+        android:textColor="#000"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="20dp"
+        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
+        android:background="#fff"
+        android:layout_alignParentEnd="true"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@+id/imagem"
+        android:background="#000"/>
+
+</RelativeLayout>
