@@ -1,43 +1,36 @@
 package com.example.desafio.activities;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
+import android.widget.Toast;
 
 import com.example.desafio.R;
 import com.example.desafio.utils.APIinterface;
+import com.example.desafio.utils.FetchURL;
+import com.example.desafio.utils.Linha;
+import com.example.desafio.utils.Onibus;
 import com.example.desafio.utils.Parada;
 import com.example.desafio.utils.RestClient;
+import com.example.desafio.utils.TaskLoadedCallback;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,99 +39,111 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener, GoogleMap.OnMarkerClickListener {
+public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private String cookie;
+    private int codigoLinha;
     private List<Marker> paradas = new ArrayList<>();
     private List<String> codigoParadas = new ArrayList<>();
+    private List<Marker> onibus = new ArrayList<>();
+    private String cookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_mapa_linha);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        paradas.clear();
-        codigoParadas.clear();
+        codigoLinha = getIntent().getIntExtra("codigoLinha", 0);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnCameraIdleListener(this);
         mMap.setOnMarkerClickListener(this);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            mMap.setMyLocationEnabled(true);
-
-        } else {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
-        }
-        // Add a marker in Sydney and move the camera
-
         LatLng sp = new LatLng(-23.536181, -46.603953);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sp, 10));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sp, 15));
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        LatLngBounds latLngBounds = new LatLngBounds(
-                new LatLng(-24.036225, -46.918987),
-                new LatLng(-23.362295, -46.370901)
-        );
+        consultaAPI();
+    }
 
-        mMap.setLatLngBoundsForCameraTarget(latLngBounds);
+    private void consultaAPI() {
+
+        paradas.clear();
+        onibus.clear();
+        codigoParadas.clear();
 
         final APIinterface apIinterface = RestClient.getService();
+
         apIinterface.autenticar("66aae5541a229cf146b7e01a622079c818f22efbf8b9b3732e3abd8f01eed225").enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
 
-
-                if (response.isSuccessful()) {
+                if (response.isSuccessful()){
 
                     cookie = response.headers().get("Set-Cookie");
-                    apIinterface.retornaParadas(cookie, "").enqueue(new Callback<List<Parada>>() {
+
+                    apIinterface.retornaParadasPorLinha(cookie, codigoLinha).enqueue(new Callback<List<Parada>>() {
                         @Override
                         public void onResponse(Call<List<Parada>> call, Response<List<Parada>> response) {
 
-                            if (response.isSuccessful()) {
+                            if (response.isSuccessful()){
 
+                                Log.e("tamanho", String.valueOf(response.body().size()));
+                                for (Parada parada : response.body()){
 
-                                for (Parada parada : response.body()) {
-
+                                    Log.e("latitude", String.valueOf(parada.getLatitude()));
+                                    Log.e("longitude", String.valueOf(parada.getLongitude()));
                                     LatLng paradaLatLng = new LatLng(parada.getLatitude(), parada.getLongitude());
 
-                                    MarkerOptions markerOptions = new MarkerOptions().position(paradaLatLng).icon(bitmapDescriptorFromVector(MapsActivity.this, R.drawable.ic_baseline_local_parking_24)).title(parada.getNome()).visible(false);
+                                    MarkerOptions markerOptions = new MarkerOptions().position(paradaLatLng).icon(bitmapDescriptorFromVector(MapaLinha.this, R.drawable.ic_baseline_local_parking_24)).title(parada.getNome()).visible(true);
                                     Marker marker = mMap.addMarker(markerOptions);
                                     paradas.add(marker);
                                     codigoParadas.add(parada.getCodigo());
                                 }
-                            } else {
 
-                                Log.e("erro", response.toString());
                             }
                         }
 
                         @Override
                         public void onFailure(Call<List<Parada>> call, Throwable t) {
 
-                            Log.e("erro", t.getMessage());
+                        }
+                    });
+
+                    apIinterface.retornaPosicaoPorLinha(cookie, codigoLinha).enqueue(new Callback<Linha>() {
+                        @Override
+                        public void onResponse(Call<Linha> call, Response<Linha> response) {
+
+                            if (response.isSuccessful()){
+
+                                for (Onibus onibus1 : response.body().getOnibusList()){
+
+                                    LatLng onibusLatLng = new LatLng(onibus1.getLatitude(), onibus1.getLongitude());
+
+                                    MarkerOptions markerOptions = new MarkerOptions().position(onibusLatLng).icon(bitmapDescriptorFromVector(MapaLinha.this, R.drawable.ic_baseline_directions_bus_24));
+                                    Marker marker = mMap.addMarker(markerOptions);
+                                    onibus.add(marker);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Linha> call, Throwable t) {
+
                         }
                     });
                 }
-
             }
 
             @Override
             public void onFailure(Call<String> call, Throwable t) {
 
-                Log.e("erro", t.getMessage());
             }
         });
     }
@@ -153,34 +158,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onCameraIdle() {
-
-        CameraPosition cameraPosition = mMap.getCameraPosition();
-
-        if (cameraPosition.zoom >= 14) {
-
-            if (!paradas.isEmpty()) {
-                for (Marker marker : paradas) {
-
-                    marker.setVisible(true);
-                }
-            }
-        } else {
-
-            for (Marker marker : paradas) {
-
-                marker.setVisible(false);
-            }
-        }
-    }
-
-    @Override
     public boolean onMarkerClick(Marker marker) {
 
-        int posicao = paradas.indexOf(marker);
+        if (paradas.contains(marker)){
 
-        startActivity(new Intent(this, ExibeParada.class).putExtra("variaveis", new String[]{marker.getTitle(), cookie, codigoParadas.get(posicao)}));
-
+            startActivity(new Intent(this, ExibeParada.class).putExtra("variaveis", new String[]{marker.getTitle(), cookie, codigoParadas.get(paradas.indexOf(marker))}));
+        }
 
         return false;
     }

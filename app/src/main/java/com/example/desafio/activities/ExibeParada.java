@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,8 +17,10 @@ import com.example.desafio.utils.Linha;
 import com.example.desafio.utils.Onibus;
 import com.example.desafio.utils.Parada;
 import com.example.desafio.utils.Previsao;
-import com.example.desafio.utils.RecyclerAdapter;
+import com.example.desafio.utils.RecyclerAdapterOnibus;
+import com.example.desafio.utils.RecyclerItemClick;
 import com.example.desafio.utils.RestClient;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +33,7 @@ public class ExibeParada extends AppCompatActivity {
 
     private String nomeParada;
     private String cookie;
-    private String codigParada;
+    private String codigoParada;
     private Parada parada;
     private String horario;
 
@@ -43,7 +47,7 @@ public class ExibeParada extends AppCompatActivity {
         assert aux != null;
         nomeParada = aux[0];
         cookie = aux[1];
-        codigParada = aux[2];
+        codigoParada = aux[2];
 
         carregaLista();
     }
@@ -60,9 +64,10 @@ public class ExibeParada extends AppCompatActivity {
         String dataStr = "Última atualização às " + horario;
         data.setText(dataStr);
 
-        List<Linha> linhas = parada.getLinhas();
-        List<Onibus> onibus = new ArrayList<>();
+        final List<Linha> linhas = parada.getLinhas();
+        final List<Onibus> onibus = new ArrayList<>();
 
+        onibus.clear();
         for (Linha linha : linhas) {
 
             List<Onibus> aux = linha.getOnibusList();
@@ -70,25 +75,49 @@ public class ExibeParada extends AppCompatActivity {
             onibus.addAll(aux);
         }
 
-        RecyclerAdapter adapter = new RecyclerAdapter(onibus);
+        RecyclerAdapterOnibus adapter = new RecyclerAdapterOnibus(onibus, linhas);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
         RecyclerView recyclerView = findViewById(R.id.lista_onibus);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.addOnItemTouchListener(new RecyclerItemClick(this, new RecyclerItemClick.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+                for (Linha linha : linhas){
+
+                    if (linha.getOnibusList().contains(onibus.get(position))){
+
+                        onibus.get(position).setDestino(linha.getDestino());
+                        onibus.get(position).setOrigem(linha.getOrigem());
+
+                        SharedPreferences sharedPreferences = getSharedPreferences("preferencias", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(onibus.get(position));
+                        editor.putString("Onibus", json);
+                        editor.apply();
+
+                        startActivity(new Intent(ExibeParada.this, MapaOnibus.class).putExtra("latitude", parada.getLatitude()).putExtra("longitude", parada.getLongitude()));
+                    }
+                }
+            }
+        }));
     }
 
     private void carregaLista(){
 
         APIinterface apIinterface = RestClient.getService();
 
-        apIinterface.retornaPrevisao(cookie, codigParada).enqueue(new Callback<Previsao>() {
+        apIinterface.retornaPrevisao(cookie, codigoParada).enqueue(new Callback<Previsao>() {
             @Override
             public void onResponse(Call<Previsao> call, Response<Previsao> response) {
 
                 if (response.isSuccessful()) {
 
                     if (response.body().getParada() != null) {
-                        Log.e("menssagem", response.body().getHorario());
+
                         parada = response.body().getParada();
                         horario = response.body().getHorario();
 
@@ -120,5 +149,15 @@ public class ExibeParada extends AppCompatActivity {
         });
 
 
+    }
+
+    public void voltarMenu(View view) {
+
+        startActivity(new Intent(this, MainActivity.class));
+    }
+
+    public void atualizaLista(View view) {
+
+        carregaLista();
     }
 }

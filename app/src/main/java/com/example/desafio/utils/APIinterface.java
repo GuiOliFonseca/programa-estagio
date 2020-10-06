@@ -26,4 +26,15 @@ public interface APIinterface {
     @GET("Previsao/Parada")
     Call<Previsao> retornaPrevisao(@Header ("Cookie") String cookie, @Query("codigoParada") String codigoParada);
 
+    @Headers("Content-Type: application/json")
+    @GET("Posicao")
+    Call<Posicao> retornaPosicao(@Header ("Cookie") String cookie);
+
+    @Headers("Content-Type: application/json")
+    @GET("Posicao/Linha")
+    Call<Linha> retornaPosicaoPorLinha(@Header ("Cookie") String cookie, @Query("codigoLinha") int codigoLinha);
+
+    @Headers("Content-Type: application/json")
+    @GET("Parada/BuscarParadasPorLinha")
+    Call<List<Parada>> retornaParadasPorLinha(@Header ("Cookie") String cookie, @Query("codigoLinha") int codigoLinha);
 }

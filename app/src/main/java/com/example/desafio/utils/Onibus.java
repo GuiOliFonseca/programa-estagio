@@ -19,49 +19,45 @@ public class Onibus {
 
     @SerializedName("py")
     @Expose
-    private String latitude;
+    private double latitude;
 
     @SerializedName("px")
     @Expose
-    private String longitude;
+    private double longitude;
+
+    private String destino;
+
+    private String origem;
 
     public String getHorarioPrevisto() {
         return horarioPrevisto;
-    }
-
-    public void setHorarioPrevisto(String horarioPrevisto) {
-        this.horarioPrevisto = horarioPrevisto;
     }
 
     public String getHorarioLocalizacao() {
         return horarioLocalizacao;
     }
 
-    public void setHorarioLocalizacao(String horarioLocalizacao) {
-        this.horarioLocalizacao = horarioLocalizacao;
-    }
-
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+    public String getDestino() {
+        return destino;
     }
 
-    public String getPrefixo() {
-        return prefixo;
+    public void setDestino(String destino) {
+        this.destino = destino;
     }
 
-    public void setPrefixo(String prefixo) {
-        this.prefixo = prefixo;
+    public String getOrigem() {
+        return origem;
+    }
+
+    public void setOrigem(String origem) {
+        this.origem = origem;
     }
 }

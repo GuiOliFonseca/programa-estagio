@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/codigo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:textColor="#000"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/origemTV"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_below="@+id/codigo"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/origem"
+        android:textColor="#000"
+        android:textSize="13sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/origem"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_below="@+id/codigo"
+        android:layout_toEndOf="@+id/origemTV"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/origem"
+        android:textColor="#000"
+        android:textSize="13sp"/>
+
+    <TextView
+        android:id="@+id/destino"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_below="@+id/codigo"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center"
+        android:text="@string/destino"
+        android:textColor="#000"
+        android:textSize="13sp"/>
+
+    <TextView
+        android:id="@+id/destinoTV"
+        android:layout_width="wrap_content"
+        android:layout_height="54dp"
+        android:layout_below="@+id/codigo"
+        android:layout_toStartOf="@+id/destino"
+        android:layout_marginTop="5dp"
+        android:gravity="center"
+        android:text="@string/destino"
+        android:textColor="#000"
+        android:textSize="13sp"
+        android:textStyle="bold"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@+id/origem"
+        android:background="#000" />
+
+</RelativeLayout>

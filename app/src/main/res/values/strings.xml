@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Desafio</string>
     <string name="title_activity_maps">Map</string>
+    <string name="menu_inicial">MENU INICIAL</string>
+    <string name="origem">Origem: </string>
+    <string name="destino">Destino: </string>
+    <string name="nenhuma_linha">Nenhuma linha foi encontrada</string>
+    <string name="title_activity_mapa_linha">Map</string>
+
+    <string name="token">pk.eyJ1IjoiZ3Vpb2xpdmVpcmEzIiwiYSI6ImNrZnlmMmwzNjFpMTgyeW85bDM0cGMwOGUifQ.w49QudWmm4chQlDEu4o0Cg</string>
 </resources>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.MainActivity"
+    android:orientation="vertical"
+    android:background="@drawable/backgroud_bus_cut">
+
+    <LinearLayout
+        android:id="@+id/layout_cabecalho"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/colorPrimaryDark"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="150dp"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/nome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:text="@string/menu_inicial"/>
+
+    </LinearLayout>
+
+
+    <Button
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape_alternative2"
+        android:text="Abrir mapa"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="abrirMapa"/>
+
+    <Button
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape_alternative2"
+        android:text="Filtrar linhas"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:onClick="abrirLinhas"/>
+
+    <Button
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_shape_alternative2"
+        android:text="Abrir mapa"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        android:textColor="#fff"
+        android:textStyle="bold"/>
+</LinearLayout>

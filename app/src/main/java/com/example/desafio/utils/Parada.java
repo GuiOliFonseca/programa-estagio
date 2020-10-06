@@ -17,11 +17,11 @@ public class Parada {
 
     @SerializedName("py")
     @Expose
-    private String latitude;
+    private double latitude;
 
     @SerializedName("px")
     @Expose
-    private String longitude;
+    private double longitude;
 
     @SerializedName("l")
     @Expose
@@ -32,39 +32,19 @@ public class Parada {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
-    }
-
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
     }
 
     public String getCodigo() {
         return codigo;
     }
 
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
     public List<Linha> getLinhas() {
         return linhas;
-    }
-
-    public void setLinhas(List<Linha> linhas) {
-        this.linhas = linhas;
     }
 }
