@@ -1,13 +1,18 @@
 package com.example.desafio.activities;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +25,8 @@ import com.example.desafio.utils.Onibus;
 import com.example.desafio.utils.Parada;
 import com.example.desafio.utils.RestClient;
 import com.example.desafio.utils.TaskLoadedCallback;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,6 +38,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,17 +55,54 @@ public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, G
     private List<String> codigoParadas = new ArrayList<>();
     private List<Marker> onibus = new ArrayList<>();
     private String cookie;
+    private Location posicaoAtual;
+    private FusedLocationProviderClient locationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mapa_linha);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        buscarPosicaoAtual();
 
         codigoLinha = getIntent().getIntExtra("codigoLinha", 0);
+    }
+
+    private void buscarPosicaoAtual() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+            return;
+        }
+
+        Task<Location> task = locationClient.getLastLocation();
+        task.addOnSuccessListener(location -> {
+
+            if (location != null) {
+
+                posicaoAtual = location;
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+
+            case 44:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    buscarPosicaoAtual();
+                }
+
+                break;
+        }
     }
 
     @Override
@@ -65,8 +110,6 @@ public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, G
         mMap = googleMap;
         mMap.setOnMarkerClickListener(this);
 
-        LatLng sp = new LatLng(-23.536181, -46.603953);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sp, 15));
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         consultaAPI();
@@ -77,6 +120,10 @@ public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, G
         paradas.clear();
         onibus.clear();
         codigoParadas.clear();
+
+        LatLng localizacaoAtual = new LatLng(posicaoAtual.getLatitude(), posicaoAtual.getLongitude());
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 13));
 
         final APIinterface apIinterface = RestClient.getService();
 
@@ -106,7 +153,6 @@ public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, G
                                     paradas.add(marker);
                                     codigoParadas.add(parada.getCodigo());
                                 }
-
                             }
                         }
 

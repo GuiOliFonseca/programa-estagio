@@ -34,7 +34,7 @@
 
         <activity
             android:name=".activities.MapaLinha"
-            android:label="@string/title_activity_mapa_linha"></activity>
+            android:label="@string/title_activity_mapa_linha"/>
         <activity android:name=".activities.ListaLinhas" />
         <activity android:name=".activities.MainActivity">
             <intent-filter>

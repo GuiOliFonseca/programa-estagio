@@ -26,6 +26,8 @@ import com.example.desafio.R;
 import com.example.desafio.utils.APIinterface;
 import com.example.desafio.utils.Parada;
 import com.example.desafio.utils.RestClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,6 +40,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,19 +56,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String cookie;
     private List<Marker> paradas = new ArrayList<>();
     private List<String> codigoParadas = new ArrayList<>();
+    private Location posicaoAtual;
+    private FusedLocationProviderClient locationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        buscarPosicaoAtual();
 
         paradas.clear();
         codigoParadas.clear();
+    }
+
+    private void buscarPosicaoAtual() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+            return;
+        }
+
+        Task<Location> task = locationClient.getLastLocation();
+        task.addOnSuccessListener(location -> {
+
+            if (location != null) {
+
+                posicaoAtual = location;
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+
+            case 44:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    buscarPosicaoAtual();
+                }
+
+                break;
+        }
     }
 
     @Override
@@ -73,18 +114,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnCameraIdleListener(this);
         mMap.setOnMarkerClickListener(this);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-            mMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-        } else {
-
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+            return;
         }
-        // Add a marker in Sydney and move the camera
+        mMap.setMyLocationEnabled(true);
 
-        LatLng sp = new LatLng(-23.536181, -46.603953);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sp, 10));
+        LatLng localizacaoAtual = new LatLng(posicaoAtual.getLatitude(), posicaoAtual.getLongitude());
+
+
+        //LatLng sp = new LatLng(-23.536181, -46.603953);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 13));
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         LatLngBounds latLngBounds = new LatLngBounds(
@@ -177,11 +218,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public boolean onMarkerClick(Marker marker) {
 
-        int posicao = paradas.indexOf(marker);
+        if(paradas.contains(marker)) {
+            int posicao = paradas.indexOf(marker);
 
-        startActivity(new Intent(this, ExibeParada.class).putExtra("variaveis", new String[]{marker.getTitle(), cookie, codigoParadas.get(posicao)}));
+            startActivity(new Intent(this, ExibeParada.class).putExtra("variaveis", new String[]{marker.getTitle(), cookie, codigoParadas.get(posicao)}));
 
-
+        }
         return false;
     }
 }

@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:background="@color/colorPrimaryDark"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="150dp"
+        android:layout_marginBottom="180dp"
         android:padding="5dp">
 
         <TextView
@@ -53,13 +53,4 @@
         android:textStyle="bold"
         android:onClick="abrirLinhas"/>
 
-    <Button
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/button_shape_alternative2"
-        android:text="Abrir mapa"
-        android:layout_gravity="center"
-        android:layout_margin="15dp"
-        android:textColor="#fff"
-        android:textStyle="bold"/>
 </LinearLayout>

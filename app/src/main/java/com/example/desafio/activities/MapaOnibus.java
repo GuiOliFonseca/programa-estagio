@@ -1,5 +1,6 @@
 package com.example.desafio.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -11,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,6 +22,8 @@ import com.example.desafio.utils.FetchURL;
 import com.example.desafio.utils.Onibus;
 import com.example.desafio.utils.Parada;
 import com.example.desafio.utils.TaskLoadedCallback;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -43,12 +48,12 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
 
     private Onibus onibus;
     private GoogleMap mMap;
-    private String cookie;
-    private Parada origem, destino;
     private double paradaLatitude;
     private double paradaLongitude;
     private Polyline rota;
     private MarkerOptions markerOnibus, markerParada;
+    private Location posicaoAtual;
+    private FusedLocationProviderClient locationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +71,8 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
             onibus = gson.fromJson(json, Onibus.class);
         }
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(MapaOnibus.this);
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
+        buscarPosicaoAtual();
 
         LatLng onibusLatLng = new LatLng(onibus.getLatitude(), onibus.getLongitude());
         LatLng paradaLatLng = new LatLng(paradaLatitude, paradaLongitude);
@@ -80,6 +84,42 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
         String url = getUrl(markerOnibus.getPosition(), markerParada.getPosition(), "driving");
 
         new FetchURL(this).execute(url, "driving");
+    }
+
+    private void buscarPosicaoAtual() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 44);
+            return;
+        }
+
+        Task<Location> task = locationClient.getLastLocation();
+        task.addOnSuccessListener(location -> {
+
+            if (location != null) {
+
+                posicaoAtual = location;
+                SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.map);
+                mapFragment.getMapAsync(this);
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+
+            case 44:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    buscarPosicaoAtual();
+                }
+
+                break;
+        }
     }
 
     @Override
@@ -114,19 +154,11 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    private String getUrl(LatLng origin, LatLng dest, String directionMode) {
-        // Origin of route
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-        // Destination of route
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-        // Mode
-        String mode = "mode=" + directionMode;
-        // Building the parameters to the web service
-        String parameters = str_origin + "&" + str_dest + "&" + mode;
-        // Output format
-        String output = "json";
-        // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=" + getString(R.string.google_maps_key);
+    private String getUrl(LatLng origem, LatLng destino, String direction) {
+
+        String url = "https://maps.googleapis.com/maps/api/directions/json?origin="+ origem.latitude + "," + origem.longitude + "&destination=" + destino.latitude + "," + destino.longitude + "&mode=" +
+                     direction + "&key=" + getString(R.string.google_maps_key);
+
         return url;
     }
 
@@ -138,7 +170,6 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
             rota.remove();
         }
 
-        Log.e("entrei", "taskDone");
         rota = mMap.addPolyline((PolylineOptions) values[0]);
     }
 }

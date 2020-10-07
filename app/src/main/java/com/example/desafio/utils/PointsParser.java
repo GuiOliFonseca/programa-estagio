@@ -23,7 +23,6 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
         this.directionMode = directionMode;
     }
 
-    // Parsing the data in non-ui thread
     @Override
     protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
 
@@ -31,61 +30,50 @@ public class PointsParser extends AsyncTask<String, Integer, List<List<HashMap<S
         List<List<HashMap<String, String>>> routes = null;
 
         try {
+
             jObject = new JSONObject(jsonData[0]);
-            Log.d("mylog", jsonData[0]);
             DataParser parser = new DataParser();
-            Log.d("mylog", parser.toString());
 
-            // Starts parsing data
             routes = parser.parse(jObject);
-            Log.d("mylog", "Executing routes");
-            Log.d("mylog", routes.toString());
-
         } catch (Exception e) {
-            Log.d("mylog", e.toString());
+
             e.printStackTrace();
         }
         return routes;
     }
 
-    // Executes in UI thread, after the parsing process
     @Override
     protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+
         ArrayList<LatLng> points;
-        PolylineOptions lineOptions = null;
-        // Traversing through all the routes
-        for (int i = 0; i < result.size(); i++) {
-            points = new ArrayList<>();
-            lineOptions = new PolylineOptions();
-            // Fetching i-th route
-            List<HashMap<String, String>> path = result.get(i);
-            // Fetching all the points in i-th route
-            for (int j = 0; j < path.size(); j++) {
-                HashMap<String, String> point = path.get(j);
-                double lat = Double.parseDouble(point.get("lat"));
-                double lng = Double.parseDouble(point.get("lng"));
-                LatLng position = new LatLng(lat, lng);
-                points.add(position);
-            }
-            // Adding all the points in the route to LineOptions
-            lineOptions.addAll(points);
-            if (directionMode.equalsIgnoreCase("walking")) {
-                lineOptions.width(10);
-                lineOptions.color(Color.MAGENTA);
-            } else {
-                lineOptions.width(10);
-                lineOptions.color(Color.parseColor("#0086ca"));
-            }
-            Log.d("mylog", "onPostExecute lineoptions decoded");
+        PolylineOptions lineOptions;
+
+        points = new ArrayList<>();
+        lineOptions = new PolylineOptions();
+
+        List<HashMap<String, String>> path = result.get(0);
+
+        for (int j = 0; j < path.size(); j++) {
+
+            HashMap<String, String> point = path.get(j);
+            double lat = Double.parseDouble(point.get("lat"));
+            double lng = Double.parseDouble(point.get("lng"));
+            LatLng position = new LatLng(lat, lng);
+            points.add(position);
         }
 
-        // Drawing polyline in the Google Map for the i-th route
-        if (lineOptions != null) {
-            //mMap.addPolyline(lineOptions);
-            taskCallback.onTaskDone(lineOptions);
+        lineOptions.addAll(points);
 
+        if (directionMode.equalsIgnoreCase("walking")) {
+
+            lineOptions.width(10);
+            lineOptions.color(Color.MAGENTA);
         } else {
-            Log.d("mylog", "without Polylines drawn");
+
+            lineOptions.width(10);
+            lineOptions.color(Color.parseColor("#0086ca"));
         }
+
+        taskCallback.onTaskDone(lineOptions);
     }
 }
