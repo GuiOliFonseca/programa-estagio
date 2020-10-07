@@ -124,6 +124,9 @@ public class MapaLinha extends FragmentActivity implements OnMapReadyCallback, G
         LatLng localizacaoAtual = new LatLng(posicaoAtual.getLatitude(), posicaoAtual.getLongitude());
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 13));
+        mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        mMap.addMarker(new MarkerOptions().position(localizacaoAtual).title("Você"));
 
         final APIinterface apIinterface = RestClient.getService();
 

@@ -24,7 +24,7 @@
         android:gravity="center"
         android:text="@string/origem"
         android:textColor="#000"
-        android:textSize="13sp"
+        android:textSize="11sp"
         android:textStyle="bold"/>
 
     <TextView
@@ -37,7 +37,7 @@
         android:gravity="center"
         android:text="@string/origem"
         android:textColor="#000"
-        android:textSize="13sp"/>
+        android:textSize="11sp"/>
 
     <TextView
         android:id="@+id/destino"
@@ -50,7 +50,7 @@
         android:gravity="center"
         android:text="@string/destino"
         android:textColor="#000"
-        android:textSize="13sp"/>
+        android:textSize="11sp"/>
 
     <TextView
         android:id="@+id/destinoTV"
@@ -62,7 +62,7 @@
         android:gravity="center"
         android:text="@string/destino"
         android:textColor="#000"
-        android:textSize="13sp"
+        android:textSize="11sp"
         android:textStyle="bold"/>
 
     <View

@@ -32,12 +32,15 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -50,7 +53,8 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
     private GoogleMap mMap;
     private double paradaLatitude;
     private double paradaLongitude;
-    private Polyline rota;
+    private Polyline rotaOnibus;
+    private Polyline rotaUsuario;
     private MarkerOptions markerOnibus, markerParada;
     private Location posicaoAtual;
     private FusedLocationProviderClient locationClient;
@@ -127,6 +131,11 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
 
         mMap = googleMap;
 
+        LatLng localizacaoAtual = new LatLng(posicaoAtual.getLatitude(), posicaoAtual.getLongitude());
+        String url = getUrl(localizacaoAtual, markerParada.getPosition(), "walking");
+
+        new FetchURL(this).execute(url, "walking");
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             mMap.setMyLocationEnabled(true);
@@ -140,7 +149,7 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
 
         mMap.addMarker(markerParada);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(markerOnibus.getPosition(), 15));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(localizacaoAtual, 15));
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
@@ -165,11 +174,12 @@ public class MapaOnibus extends AppCompatActivity implements OnMapReadyCallback,
     @Override
     public void onTaskDone(Object... values) {
 
-        if (rota != null) {
+        if (rotaOnibus != null) {
 
-            rota.remove();
+            rotaUsuario = mMap.addPolyline((PolylineOptions) values[0]);
+        }else {
+
+            rotaOnibus = mMap.addPolyline((PolylineOptions) values[0]);
         }
-
-        rota = mMap.addPolyline((PolylineOptions) values[0]);
     }
 }

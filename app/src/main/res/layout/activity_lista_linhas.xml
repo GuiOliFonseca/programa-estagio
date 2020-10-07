@@ -35,7 +35,6 @@
         android:layout_below="@+id/layout_cabecalho"
         android:background="@color/colorPrimary"
         android:layout_marginBottom="10dp"
-        android:iconifiedByDefault="false"
         android:queryHint="Origem"/>
 
 
@@ -47,7 +46,6 @@
         android:layout_alignParentEnd="true"
         android:background="@color/colorPrimary"
         android:layout_marginBottom="10dp"
-        android:iconifiedByDefault="false"
         android:queryHint="Destino"/>
 
     <ProgressBar
